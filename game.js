@@ -10,5 +10,8 @@ import './js/libs/symbol'
 // import MeshDemo from './js/MeshDemo'
 // new MeshDemo();
 
-import ObjectsDemo from './js/ObjectsDemo'
-new ObjectsDemo();
+// import ObjectsDemo from './js/ObjectsDemo'
+// new ObjectsDemo();
+
+import AdvancedObjectsDemo from './js/AdvancedObjectsDemo'
+new AdvancedObjectsDemo();
