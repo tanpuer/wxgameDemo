@@ -13,5 +13,8 @@ import './js/libs/symbol'
 // import ObjectsDemo from './js/ObjectsDemo'
 // new ObjectsDemo();
 
-import AdvancedObjectsDemo from './js/AdvancedObjectsDemo'
-new AdvancedObjectsDemo();
+// import AdvancedObjectsDemo from './js/AdvancedObjectsDemo'
+// new AdvancedObjectsDemo();
+
+import ParticleSystemDemo from './js/ParticleSystemDemo'
+new ParticleSystemDemo();

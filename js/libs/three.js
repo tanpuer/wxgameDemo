@@ -18706,7 +18706,8 @@
         alphaTest: gl.getUniformLocation(program, 'alphaTest')
       };
 
-      var canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+      //adapter!!!
+      // var canvas = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
       canvas.width = 8;
       canvas.height = 8;
 
@@ -46483,7 +46484,9 @@
 
     console.error('THREE.CanvasRenderer has been moved to /examples/js/renderers/CanvasRenderer.js');
 
-    this.domElement = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+//adapter!!!
+    // this.domElement = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+    this.domElement = canvas;
     this.clear = function () { };
     this.render = function () { };
     this.setClearColor = function () { };
