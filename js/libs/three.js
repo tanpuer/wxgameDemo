@@ -9172,7 +9172,9 @@
 
       var scope = this;
 
-      var indices = geometry.index !== null ? geometry.index.array : undefined;
+      //adapter!!!
+      // var indices = geometry.index !== null ? geometry.index.array : undefined;
+      var indices = geometry.index != null ? geometry.index.array : undefined;
       var attributes = geometry.attributes;
 
       var positions = attributes.position.array;
