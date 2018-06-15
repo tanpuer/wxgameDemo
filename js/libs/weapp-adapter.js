@@ -1243,7 +1243,18 @@
 	  }, {
 	    key: 'overrideMimeType',
 	    value: function overrideMimeType() {}
-	  }, {
+    }, {
+      key: 'addEventListener',
+      value: function addEventListener(type, listener) {
+        if (typeof listener === 'function') {
+          let event = { target: this }
+          let that = this
+          this['on' + type] = function () {
+            listener.call(that, event)
+          }
+        }
+      }
+    }, {
 	    key: 'send',
 	    value: function send() {
 	      var _this = this
