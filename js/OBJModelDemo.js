@@ -2,6 +2,7 @@ import * as THREE from './libs/three.js';
 import { createBox} from './GameUtil.js';
 import './libs/OBJLoader.js';
 import './libs/MTLLoader.js';
+import './libs/OrbitControls.js';
 
 let originX;
 let originY;
@@ -18,10 +19,10 @@ export default class OBJModelDemo {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.camera.position.z = 5;
-    this.draw();
+
     this.loadOBJ();
 
-    this.renderer.render(this.scene, this.camera);
+    this.loop();
 
     wx.onTouchStart(function (data) {
       originX = data["touches"][0]["screenX"];
@@ -36,34 +37,31 @@ export default class OBJModelDemo {
 
   }
 
-  draw(){
-    this.box = createBox();
-    this.scene.add(this.box);
-    requestAnimationFrame(()=>this.loop());
-  }
-
   loop(){
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(() => this.loop());
   }
 
   loadOBJ(){
+    var scene = this.scene;
+    var camera = this.camera;
     var manager = new THREE.LoadingManager();
     var loader = new THREE.OBJLoader(manager);
     loader.load('http://localhost:8082/tree', function (object) {
 
       object.traverse(function (child) {
 
-        if (child instanceof THREE.Mesh) {
+        // if (child instanceof THREE.Mesh) {
 
-          child.material.map = texture;
+        //   child.material.map = texture;
 
-        }
+        // }
 
       });
 
       object.position.y = -1;
       scene.add(object);
+      controls = new THREE.OrbitControls(camera);
 
     }, null, null);;
   }

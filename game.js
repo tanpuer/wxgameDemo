@@ -19,7 +19,7 @@ import './js/libs/symbol'
 // import ParticleSystemDemo from './js/ParticleSystemDemo'
 // new ParticleSystemDemo();
 
-import Game from './js/OBJModelDemo.js'
+import OBJModelDemo from './js/OBJModelDemo.js'
 new OBJModelDemo();
 
 // import JsonModelDemo from './js/JsonModelDemo.js'
