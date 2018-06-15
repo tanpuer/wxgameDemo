@@ -1,4 +1,5 @@
 import * as THREE from './libs/three.js';
+import './libs/OrbitControls.js';
 
 var originX = 0;
 var originY = 0;
@@ -17,6 +18,8 @@ export default class Demo {
     this.drawEarth();
     this.drawMoon();
     this.addLight();
+
+    this.controls = new THREE.OrbitControls(this.camera);
 
     wx.onTouchStart(function (data) {
       originX = data["touches"][0]["screenX"];
