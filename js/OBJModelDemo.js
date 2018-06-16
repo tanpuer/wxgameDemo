@@ -61,7 +61,7 @@ export default class OBJModelDemo {
 
       object.position.y = -1;
       scene.add(object);
-      controls = new THREE.OrbitControls(camera);
+      new THREE.OrbitControls(camera);
 
     }, null, null);;
   }
