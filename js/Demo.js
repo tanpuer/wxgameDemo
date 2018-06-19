@@ -71,6 +71,7 @@ export default class Demo {
     let texture = new THREE.TextureLoader().load("res/earthmap.bmp");
     let material = new THREE.MeshPhongMaterial({ map: texture });
     this.earthMash = new THREE.Mesh(geometry, material);
+    this.earthMash.receiveShadow = true;
     this.scene.add(this.earthMash);
     requestAnimationFrame(() => this.earthLoop());
   }
@@ -81,6 +82,8 @@ export default class Demo {
     console.log(texture);
     let material = new THREE.MeshLambertMaterial({ map: texture });
     this.moonMash = new THREE.Mesh(geometry, material);
+    this.moonMash.receiveShadow = false;
+    this.moonMash.castShadow = true;
     this.scene.add(this.moonMash);
     let matrix = new THREE.Matrix4().makeRotationY(3.14 / 180 * 180);
     console.log(matrix);

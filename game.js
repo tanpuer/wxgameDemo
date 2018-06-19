@@ -19,9 +19,17 @@ import './js/libs/symbol'
 // import ParticleSystemDemo from './js/ParticleSystemDemo'
 // new ParticleSystemDemo();
 
-import OBJModelDemo from './js/OBJModelDemo.js'
-new OBJModelDemo();
+// import OBJModelDemo from './js/OBJModelDemo.js'
+// new OBJModelDemo();
 
 // import JsonModelDemo from './js/JsonModelDemo.js'
 // new JsonModelDemo();
 
+// import AviatorDemo from './js/AviatorDemo.js'
+// new AviatorDemo();
+
+// import ShadowDemo from './js/ShadowDemo.js'
+// new ShadowDemo();
+
+import JumpDemo from './js/JumpDemo.js'
+new JumpDemo();
