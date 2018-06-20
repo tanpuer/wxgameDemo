@@ -74,7 +74,7 @@ export default class JumpDemo {
   }
 
   createPlane() {
-    let planeGeometry = new THREE.PlaneBufferGeometry(1000, 1000, 10, 10);
+    let planeGeometry = new THREE.PlaneBufferGeometry(100, 100, 10, 10);
     let planeMaterial = new THREE.MeshLambertMaterial({
       color: "#ffffff"
     });
@@ -167,8 +167,8 @@ export default class JumpDemo {
   }
 
   addListeners() {
-    document.addEventListener('touchstart', this.onTouchStart, false);
-    document.addEventListener('touchend', this.onTouchEnd, false);
+    canvas.addEventListener('touchstart', this.onTouchStart, false);
+    canvas.addEventListener('touchend', this.onTouchEnd, false);
   }
 
   onTouchStart(data) {
@@ -176,6 +176,7 @@ export default class JumpDemo {
   }
 
   onTouchEnd(data) {
+
     _this.CalculateJumpDiff();
     if (isJumping) {
       return;
@@ -184,7 +185,7 @@ export default class JumpDemo {
     let startCoords = { x: jumper.position.x, y: jumper.position.y, z: 0 };
     let finishCoords = { x: startCoords.x + diffX, y: startCoords.y + diffY, z: 2 };
     let tween = new TWEEN.Tween(startCoords)
-      .to(finishCoords, 2)
+      .to(finishCoords, 2000)
       .easing(TWEEN.Easing.Sinusoidal.InOut)
       .onUpdate(() => {
         let z;
@@ -225,7 +226,7 @@ export default class JumpDemo {
     let cameraStartCoords = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
     let cameraFinishCoords = { x: cameraStartCoords.x + diffX, y: cameraStartCoords.y + diffY, z: camera.position.z };
     let tween = new TWEEN.Tween(cameraStartCoords)
-      .to(cameraFinishCoords, 1)
+      .to(cameraFinishCoords, 1000)
       .easing(TWEEN.Easing.Linear.None)
       .onUpdate(() => {
         camera.position.set(cameraStartCoords.x, cameraStartCoords.y, cameraStartCoords.z);

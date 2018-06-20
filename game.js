@@ -1,5 +1,6 @@
 import './js/libs/weapp-adapter'
 import './js/libs/symbol'
+import './js/libs/tween-hook'
 
 // import Demo from './js/Demo'
 // new Demo();
