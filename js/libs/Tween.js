@@ -7,86 +7,66 @@
  * Thank you all, you're awesome!
  */
 
+var TWEEN = TWEEN || (function () {
 
-var _Group = function () {
-  this._tweens = {};
-  this._tweensAddedDuringUpdate = {};
-};
+  var _tweens = [];
 
-_Group.prototype = {
-  getAll: function () {
+  return {
 
-    return Object.keys(this._tweens).map(function (tweenId) {
-      return this._tweens[tweenId];
-    }.bind(this));
+    getAll: function () {
 
-  },
+      return _tweens;
 
-  removeAll: function () {
+    },
 
-    this._tweens = {};
+    removeAll: function () {
 
-  },
+      _tweens = [];
 
-  add: function (tween) {
+    },
 
-    this._tweens[tween.getId()] = tween;
-    this._tweensAddedDuringUpdate[tween.getId()] = tween;
+    add: function (tween) {
 
-  },
+      _tweens.push(tween);
 
-  remove: function (tween) {
+    },
 
-    delete this._tweens[tween.getId()];
-    delete this._tweensAddedDuringUpdate[tween.getId()];
+    remove: function (tween) {
 
-  },
+      var i = _tweens.indexOf(tween);
 
-  update: function (time, preserve) {
-
-    var tweenIds = Object.keys(this._tweens);
-
-    if (tweenIds.length === 0) {
-      return false;
-    }
-
-    time = time !== undefined ? time : TWEEN.now();
-
-    // Tweens are updated in "batches". If you add a new tween during an update, then the
-    // new tween will be updated in the next batch.
-    // If you remove a tween during an update, it may or may not be updated. However,
-    // if the removed tween was added during the current batch, then it will not be updated.
-    while (tweenIds.length > 0) {
-      this._tweensAddedDuringUpdate = {};
-
-      for (var i = 0; i < tweenIds.length; i++) {
-
-        var tween = this._tweens[tweenIds[i]];
-
-        if (tween && tween.update(time) === false) {
-          tween._isPlaying = false;
-
-          if (!preserve) {
-            delete this._tweens[tweenIds[i]];
-          }
-        }
+      if (i !== -1) {
+        _tweens.splice(i, 1);
       }
 
-      tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+    },
+
+    update: function (time, preserve) {
+
+      if (_tweens.length === 0) {
+        return false;
+      }
+
+      var i = 0;
+
+      time = time !== undefined ? time : TWEEN.now();
+
+      while (i < _tweens.length) {
+
+        if (_tweens[i].update(time) || preserve) {
+          i++;
+        } else {
+          _tweens.splice(i, 1);
+        }
+
+      }
+
+      return true;
+
     }
+  };
 
-    return true;
-
-  }
-};
-
-var TWEEN = new _Group();
-
-TWEEN.Group = _Group;
-TWEEN._nextId = 0;
-TWEEN.nextId = function () {
-  return TWEEN._nextId++;
-};
+})();
 
 
 // Include a performance.now polyfill.
@@ -119,7 +99,20 @@ else {
 }
 
 
-TWEEN.Tween = function (object, group) {
+function assign(target, source) {
+  var keys = Object.keys(source);
+  var length = keys.length;
+
+  for (var i = 0; i < length; i += 1) {
+    target[keys[i]] = source[keys[i]];
+  }
+
+  return target;
+}
+
+
+TWEEN.Tween = function (object) {
+
   this._object = object;
   this._valuesStart = {};
   this._valuesEnd = {};
@@ -140,20 +133,10 @@ TWEEN.Tween = function (object, group) {
   this._onUpdateCallback = null;
   this._onCompleteCallback = null;
   this._onStopCallback = null;
-  this._group = group || TWEEN;
-  this._id = TWEEN.nextId();
 
 };
 
-TWEEN.Tween.prototype = {
-  getId: function getId() {
-    return this._id;
-  },
-
-  isPlaying: function isPlaying() {
-    return this._isPlaying;
-  },
-
+TWEEN.Tween.prototype = assign(Object.create(Object.prototype), {
   to: function to(properties, duration) {
 
     this._valuesEnd = properties;
@@ -168,13 +151,13 @@ TWEEN.Tween.prototype = {
 
   start: function start(time) {
 
-    this._group.add(this);
+    TWEEN.add(this);
 
     this._isPlaying = true;
 
     this._onStartCallbackFired = false;
 
-    this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
+    this._startTime = time !== undefined ? time : TWEEN.now();
     this._startTime += this._delayTime;
 
     for (var property in this._valuesEnd) {
@@ -218,11 +201,11 @@ TWEEN.Tween.prototype = {
       return this;
     }
 
-    this._group.remove(this);
+    TWEEN.remove(this);
     this._isPlaying = false;
 
     if (this._onStopCallback !== null) {
-      this._onStopCallback(this._object);
+      this._onStopCallback.call(this._object, this._object);
     }
 
     this.stopChainedTweens();
@@ -243,11 +226,6 @@ TWEEN.Tween.prototype = {
       this._chainedTweens[i].stop();
     }
 
-  },
-
-  group: function group(group) {
-    this._group = group;
-    return this;
   },
 
   delay: function delay(amount) {
@@ -271,23 +249,23 @@ TWEEN.Tween.prototype = {
 
   },
 
-  yoyo: function yoyo(yy) {
+  yoyo: function yoyo(yoyo) {
 
-    this._yoyo = yy;
+    this._yoyo = yoyo;
     return this;
 
   },
 
-  easing: function easing(eas) {
+  easing: function easing(easing) {
 
-    this._easingFunction = eas;
+    this._easingFunction = easing;
     return this;
 
   },
 
-  interpolation: function interpolation(inter) {
+  interpolation: function interpolation(interpolation) {
 
-    this._interpolationFunction = inter;
+    this._interpolationFunction = interpolation;
     return this;
 
   },
@@ -340,14 +318,14 @@ TWEEN.Tween.prototype = {
     if (this._onStartCallbackFired === false) {
 
       if (this._onStartCallback !== null) {
-        this._onStartCallback(this._object);
+        this._onStartCallback.call(this._object, this._object);
       }
 
       this._onStartCallbackFired = true;
     }
 
     elapsed = (time - this._startTime) / this._duration;
-    elapsed = (this._duration === 0 || elapsed > 1) ? 1 : elapsed;
+    elapsed = elapsed > 1 ? 1 : elapsed;
 
     value = this._easingFunction(elapsed);
 
@@ -387,7 +365,7 @@ TWEEN.Tween.prototype = {
     }
 
     if (this._onUpdateCallback !== null) {
-      this._onUpdateCallback(this._object);
+      this._onUpdateCallback.call(this._object, value);
     }
 
     if (elapsed === 1) {
@@ -432,7 +410,7 @@ TWEEN.Tween.prototype = {
 
         if (this._onCompleteCallback !== null) {
 
-          this._onCompleteCallback(this._object);
+          this._onCompleteCallback.call(this._object, this._object);
         }
 
         for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
@@ -450,7 +428,7 @@ TWEEN.Tween.prototype = {
     return true;
 
   }
-};
+});
 
 
 TWEEN.Easing = {

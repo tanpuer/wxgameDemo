@@ -1,6 +1,7 @@
 import * as THREE from './libs/three.js';
 import './libs/OrbitControls.js';
-// import './libs/Tween.js';
+import * as TWEEN from './libs/Tween.js';
+// import './libs/RequestAnimationFrame.js';
 
 let scene;
 let camera;
@@ -8,9 +9,14 @@ let renderer;
 let plane;
 let shadowLight;
 let jumper;
-let timeInterval;
 let cube;
-let cubeShader;
+let secondCube;
+let id = 0;
+let _this;
+let isJumping;
+let diffX;
+let diffY;
+let cubeContainer = [];
 
 export default class JumpDemo {
 
@@ -35,7 +41,9 @@ export default class JumpDemo {
     this.addListeners();
 
     new THREE.OrbitControls(camera);
+    _this = this;
     requestAnimationFrame(() => this.loop());
+
   }
 
   createLights() {
@@ -56,15 +64,17 @@ export default class JumpDemo {
     shadowLight.shadow.mapSize.height = 1024;
     scene.add(shadowLight);
 
+    shadowLight.target = jumper;
+
     let ambientLight = new THREE.AmbientLight("#ffffff", 0.2);
     scene.add(ambientLight);
 
-    // let helper = new THREE.CameraHelper(shadowLight.shadow.camera);
-    // scene.add(helper);
+    let helper = new THREE.CameraHelper(shadowLight.shadow.camera);
+    scene.add(helper);
   }
 
   createPlane() {
-    let planeGeometry = new THREE.PlaneBufferGeometry(10, 10, 10, 10);
+    let planeGeometry = new THREE.PlaneBufferGeometry(100, 100, 10, 10);
     let planeMaterial = new THREE.MeshLambertMaterial({
       color: "#ffffff"
     });
@@ -75,7 +85,8 @@ export default class JumpDemo {
 
   createBox() {
 
-
+    //暂时就放2个cube
+    //1
     let boxGeometry = new THREE.BoxGeometry(2, 2, 0.5, 4, 4, 2);
     // let texture = new THREE.TextureLoader().load("res/record.png");
     let boxMaterial = new THREE.MeshPhongMaterial({
@@ -88,11 +99,38 @@ export default class JumpDemo {
     cube.rotation.z = -40;
     cube.castShadow = true;
     cube.receiveShadow = true;
-
+    cubeContainer.push(cube);
     scene.add(cube);
+    id++;
+
+    //2
+    secondCube = cube.clone();
+    secondCube.castShadow = true;
+    secondCube.receiveShadow = true;
+    secondCube.translateX(-3);
+    secondCube.translateY(0);
+    scene.add(secondCube);
+    cubeContainer.push(secondCube);
+    id++;
+
+
+    //计算2个cube之间的距离
+    let firstCubePos = cube.position;
+    let secondCubePos = secondCube.position;
+    diffX = secondCubePos.x - firstCubePos.x;
+    diffY = secondCubePos.y - firstCubePos.y;
+  }
+
+  CalculateJumpDiff() {
+    //计算2个cube之间的距离
+    let currentCubePos = cubeContainer[id - 2].position;
+    let nextCubePos = cubeContainer[id - 1].position;
+    diffX = nextCubePos.x - currentCubePos.x;
+    diffY = nextCubePos.y - currentCubePos.y;
   }
 
   createJumper() {
+
     //圆-圆-圆柱体
     jumper = new THREE.Object3D();
 
@@ -123,40 +161,79 @@ export default class JumpDemo {
   }
 
   loop() {
+    TWEEN.update();
     renderer.render(scene, camera);
-    // TWEEN.update();
     requestAnimationFrame(() => this.loop());
   }
 
   addListeners() {
-    // document.addEventListener('touchstart', this.onTouchStart, false);
-    // document.addEventListener('touchend', this.onTouchEnd, false);
+    document.addEventListener('touchstart', this.onTouchStart, false);
+    document.addEventListener('touchend', this.onTouchEnd, false);
   }
 
   onTouchStart(data) {
-    this.initTween();
-    // let i = 1.0;
-    // timeInterval = setInterval(() => {
-    //   if (i >= 0.5) {
-    //     cube.scale.set(1, 1, i);
-    //     jumper.scale.set(1, 1, i);
-    //   }
-    //   i -= 0.02;
-    // }, 200);
+
   }
 
   onTouchEnd(data) {
-    clearInterval(timeInterval);
+    _this.CalculateJumpDiff();
+    if (isJumping) {
+      return;
+    }
+    //Tween.js 动画
+    let startCoords = { x: jumper.position.x, y: jumper.position.y, z: 0 };
+    let finishCoords = { x: startCoords.x + diffX, y: startCoords.y + diffY, z: 2 };
+    let tween = new TWEEN.Tween(startCoords)
+      .to(finishCoords, 2)
+      .easing(TWEEN.Easing.Sinusoidal.InOut)
+      .onUpdate(() => {
+        let z;
+        if (startCoords.z <= 1) {
+          z = startCoords.z;
+        } else {
+          z = 2 - startCoords.z;
+        }
+        // jumper.rotation.y = startCoords.z * Math.PI;
+        jumper.position.set(startCoords.x, startCoords.y, z * 2);
+      })
+      .onComplete(() => {
+        _this.addNewMesh();
+        _this.moveCamera();
+      });
+    isJumping = true;
+    tween.start();
   }
 
-  initTween() {
-    // console.log(jumper);
-    // let coords = jumper.up;
-    // let tween = new TWEEN.Tween(coords)
-    //   .to({ x: coords.x, y: coords.y, z: coords.z + 1 }, 1000)
-    //   .easing(THREE.Easing.Quadratic.Out)
-    //   .start();
+  addNewMesh() {
+    let newCube = cubeContainer[id - 1].clone();
+    newCube.castShadow = true;
+    newCube.receiveShadow = true;
+    if (Math.random() > 0.5) {
+      newCube.translateY(3);
+      //向左
+    } else {
+      //向前
+      newCube.translateX(-3);
+    }
+    scene.add(newCube);
+    cubeContainer.push(newCube);
+    id++;
+  }
 
+  moveCamera() {
+    this.CalculateJumpDiff();
+    let cameraStartCoords = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+    let cameraFinishCoords = { x: cameraStartCoords.x + diffX, y: cameraStartCoords.y + diffY, z: camera.position.z };
+    let tween = new TWEEN.Tween(cameraStartCoords)
+      .to(cameraFinishCoords, 1)
+      .easing(TWEEN.Easing.Linear.None)
+      .onUpdate(() => {
+        camera.position.set(cameraStartCoords.x, cameraStartCoords.y, cameraStartCoords.z);
+      })
+      .onComplete(() => {
+        isJumping = false;
+      });
+    tween.start();
   }
 
 }
