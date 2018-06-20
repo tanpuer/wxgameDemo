@@ -74,7 +74,7 @@ export default class JumpDemo {
   }
 
   createPlane() {
-    let planeGeometry = new THREE.PlaneBufferGeometry(100, 100, 10, 10);
+    let planeGeometry = new THREE.PlaneBufferGeometry(1000, 1000, 10, 10);
     let planeMaterial = new THREE.MeshLambertMaterial({
       color: "#ffffff"
     });
